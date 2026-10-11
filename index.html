@@ -59,6 +59,8 @@ aside{width:100%;max-width:340px;justify-self:center}.cols[data-lay=top] aside{o
 
 <h2>Magias</h2><div id="mg"></div><button onclick="mgs(cur()).push({n:'',c:1,cd:0,o:1});sv();rM()">+ Magia</button>
 
+<h2>Itens</h2><div id="it"></div><div class="row"><button onclick="its(cur()).push({n:'',e:1,o:1});sv();rI()">+ Item</button><b id="is"></b></div>
+
 <h2>Guilda Tempest</h2><div id="gt"></div>
 
 <h2>Exportar / Importar</h2>
@@ -85,7 +87,7 @@ function R(){sv();const s=cur();
 $('sel').innerHTML=S.s.map((x,i)=>`<option value="${i}" ${i==S.c?'selected':''}>${esc(x.t)}</option>`).join('');
 $('hd').innerHTML=`<label style="grid-column:1/-1"><span class=l>Título da ficha</span><input value="${esc(s.t)}" oninput="cur().t=this.value;sv();$('sel').options[S.c].text=this.value"></label>`+
 F.map(([k,n])=>`<label><span class=l>${n}</span><input value="${esc(s.f[k])}" oninput="cur().f['${k}']=this.value;sv();${k=='nivel'?'rK()':''}"></label>`).join('');
-$('mode').value=s.mode;ly();rA();rP();rM();rK();rG()}
+$('mode').value=s.mode;ly();rA();rP();rM();rK();rG();rI()}
 function rA(){const s=cur(),p=s.mode=='p';let sp=0,sum=0;
 $('pbox').style.display=$('cst').style.display=p?'':'none';$('rb').style.display=p?'none':'';$('pool').value=s.pool;
 $('at').innerHTML=A.map((a,i)=>{const b=s.base[i];sp+=+s.costs[b]||0;sum+=b;
@@ -126,6 +128,10 @@ function rG(){const g=gg(cur());$('gt').innerHTML=`<div class=g><label><span cla
 <span class=l>Descrição breve</span><textarea oninput="gu('desc',this.value)">${esc(g.desc)}</textarea><span class=l>Background (opcional)</span><textarea oninput="gu('bg',this.value)">${esc(g.bg)}</textarea>`}
 function gtx(){const s=cur(),f=s.f,g=gg(s),n=String(f.nivel||3).padStart(2,'0'),ti=[f.nome||s.t,n,f.classe].filter(Boolean).join(' - ')+(f.dist?' • '+f.dist:'');
 $('io').value=[`Título: ${ti}`,'',`Imagem: ${g.img||'(ATENÇÃO: adicione a imagem do personagem!)'}`,'',`Nome: ${f.nome||''}`,`Jogador: ${f.jogador||''}`,`Slot de Personagem: ${g.slot}`,`Raça: ${f.raca||''}`,`Devoção: ${f.div||''}`,`Origem: ${f.origem||''}`,`Classe: ${[f.classe,f.dist].filter(Boolean).join(' / ')}`,`Nível: ${n}`,`PeA: ${g.pea}`,`Tibares: ${g.tib}`,`Função Primária: ${g.fn.join(', ')}`,'',`Descrição Breve: ${g.desc}`,'',`Background: ${g.bg}`].join('\n');$('io').scrollIntoView()}
+const its=s=>s.it||(s.it=[]),tsp=s=>Math.round(its(s).reduce((a,i)=>a+(+i.e||0),0)*10)/10,
+EQK={n:'nameequipment',e:'equipmentespaco',d:'equipmentdescription'};
+function iu(i,k,v){its(cur())[i][k]=v;sv();$('is').textContent='Espaços usados: '+tsp(cur())}
+function rI(){$('it').innerHTML=its(cur()).map((m,i)=>`<div class=pw><div class=row><input value="${esc(m.n)}" placeholder="Nome do item" oninput="iu(${i},'n',this.value)"><label>Espaço <input type=number step=0.5 style="width:70px" value="${+m.e||0}" onchange="iu(${i},'e',this.value)"></label><button onclick="its(cur())[${i}].o^=1;sv();rI()">${m.o?'▲':'▼'}</button><button class=s onclick="its(cur()).splice(${i},1);sv();rI()">✕</button></div>${m.o?`<textarea placeholder="Descrição" oninput="iu(${i},'d',this.value)">${esc(m.d)}</textarea>`:''}</div>`).join('');$('is').textContent='Espaços usados: '+tsp(cur())}
 function r20(){const s=cur(),f=s.f,z='0',at=['for','des','con','int','sab','car'],
 nt=[f.dist&&'Distinção: '+f.dist,f.xp&&'XP: '+f.xp].filter(Boolean).join('\n'),
 o={isJDA:true,playername:f.jogador||'',trace:f.raca||'',torigin:f.origem||'',tlevel:f.classe||'',charnivel:String(f.nivel||1)};
@@ -138,6 +144,7 @@ o[n+'_treinada']=e.t?'1':z;o[n+'atributo2']=`@{${a}_mod} + @{condicao${'for des 
 ['attacks','abilities','powers','spells1','spells2','spells3','spells4','spells5','extraSkills','equipments'].forEach(k=>o[k]=[]);
 o.abilities=s.pw.map(p=>({nameability:(p.e?p.e+' ':'')+(p.n||''),abilitydescription:(p.f?'Origem: '+p.f+'. ':'')+(p.d||'').replace(/\s*\n\s*/g,' ')}));
 for(let c=1;c<=5;c++)o['spells'+c]=mgs(s).filter(m=>+m.c==c).map(m=>({namespell:m.n||'',spelltipo:m.t||'',spellcd:String(+m.cd||0),spellexecucao:m.x||'',spellalcance:m.a||'',spellduracao:m.d||'',spellalvoarea:m.v||'',spellresistencia:m.r||'',spelldescription:(m.ds||'').replace(/\s*\n\s*/g,' ')}));
+o.equipments=its(s).map(m=>({[EQK.n]:m.n||'',[EQK.e]:String(+m.e||0),[EQK.d]:(m.d||'').replace(/\s*\n\s*/g,' ')}));
 return o}
 function r20t(){$('io').value=JSON.stringify(r20());$('io').scrollIntoView()}
 async function r20d(){const b=new Blob([JSON.stringify(r20())],{type:'application/json'}),n='t20-'+(cur().f.nome||cur().t).replace(/[\\/:*?"<>|]/g,'_')+'.json',m=t=>$('imsg').textContent=t;let ok=0;
@@ -191,6 +198,9 @@ if(sl.length){x.fillStyle='#a31515';x.font='700 20px Cinzel,Georgia,serif';x.fil
 sl.forEach((k,i)=>{const cx=20+(i%3)*c3,cy=y+Math.floor(i/3)*20;x.fillStyle='#2b1a14';x.textAlign='left';x.font='13px Georgia,serif';x.fillText(k.nm,cx,cy,c3-50);
 x.textAlign='right';x.font='700 14px Georgia,serif';x.fillText(sgn(k.t),cx+c3-14,cy)});
 x.textAlign='left';y+=rw*20+26}
+const iv=its(s);if(iv.length){x.fillStyle='#a31515';x.font='700 20px Cinzel,Georgia,serif';x.fillText('ITENS ('+tsp(s)+' ESPAÇOS)',20,y);y+=8;x.fillRect(20,y,W-40,2);y+=22;const c2=(W-40)/2;
+iv.forEach((m,i)=>{const cx=20+(i%2)*c2,cy=y+Math.floor(i/2)*20;x.fillStyle='#2b1a14';x.textAlign='left';x.font='13px Georgia,serif';x.fillText(m.n||'(sem nome)',cx,cy,c2-50);x.textAlign='right';x.font='700 14px Georgia,serif';x.fillText(String(+m.e||0),cx+c2-14,cy)});
+x.textAlign='left';y+=Math.ceil(iv.length/2)*20+26}
 if(s.pw.length){x.fillStyle='#a31515';x.font='700 20px Cinzel,Georgia,serif';x.fillText('PODERES',20,y);y+=8;x.fillRect(20,y,W-40,2);y+=24;x.textAlign='left';
 s.pw.forEach(p=>{x.fillStyle='#2b1a14';x.font='700 16px Georgia,serif';x.fillText((p.e?p.e+' ':'')+(p.n||'(sem nome)')+(p.f?' ('+p.f+')':''),20,y,W-40);y+=22;
 if(p.d){x.font='italic 14px Georgia,serif';wr(x,p.d,W-40).forEach(l=>{x.fillText(l,20,y);y+=19})}y+=10})}
@@ -212,9 +222,10 @@ c.innerHTML=`<div class=ch><b>${esc(f.nome||s.t)}</b></div><div class=cb>
 ${[['Raça',f.raca],['Origem',f.origem],['Classe',f.classe],['Nível',f.nivel],['Jogador',f.jogador],['Divindade',f.div],['Distinção',f.dist],['XP',f.xp]].filter(x=>x[1]).map(x=>`<p><b>${x[0]}:</b> ${esc(x[1])}</p>`).join('')}
 <div class=ca>${A.map((a,i)=>`<div><span>${a}</span><b>${(t=>t>0?'+'+t:t)(tot(s,i))}</b></div>`).join('')}</div>
 ${skl(s).some(k=>k.tr)?`<h4>Perícias treinadas</h4><div class=sk>${skl(s).filter(k=>k.tr).map(k=>`<div><span>${esc(k.nm)}</span><b>${sgn(k.t)}</b></div>`).join('')}</div>`:''}
+${its(s).length?`<h4>Itens (${tsp(s)} espaços)</h4><div class=sk>${its(s).map(m=>`<div><span>${esc(m.n||'(sem nome)')}</span><b>${+m.e||0}</b></div>`).join('')}</div>`:''}
 ${s.pw.length?'<h4>Poderes</h4>'+s.pw.map(p=>`<p><b>${p.e?esc(p.e)+' ':''}${esc(p.n||'(sem nome)')}</b>${p.f?` <small>(${esc(p.f)})</small>`:''}${p.d?`<em>${esc(p.d)}</em>`:''}</p>`).join(''):''}${mgs(s).length?'<h4>Magias</h4>'+mgs(s).map(m=>`<p><b>${esc(m.n||'(sem nome)')}</b> — ${esc(m.c)}º círculo${mdet(m)?`<em>${esc(mdet(m))}</em>`:''}${m.ds?`<em>${esc(m.ds)}</em>`:''}</p>`).join(''):''}</div>`}
 function exC(){const s=cur(),f=s.f,L2=F.map(([k,n])=>f[k]?n+': '+f[k]:'').filter(Boolean);
-$('io').value=['# '+(f.nome||s.t),...L2,'','Atributos (base + racial + temp. = total)',...A.map((a,i)=>`${a}: ${s.base[i]} + ${+s.rac[i]||0} + ${+(s.tmp||[])[i]||0} = ${tot(s,i)}`),'','Perícias (★ treinada)',skl(s).map(k=>(k.tr?'★ ':'')+k.nm+' '+sgn(k.t)).join(', '),...(s.pw.length?['','Poderes',...s.pw.map(p=>'- '+(p.e?p.e+' ':'')+p.n+(p.f?' ('+p.f+')':'')+(p.d?': '+p.d:''))]:[]),...(mgs(s).length?['','Magias',...mgs(s).map(m=>`- ${m.c}º círculo, ${m.n}${mdet(m)?' ('+mdet(m)+')':''}${m.ds?': '+m.ds:''}`)]:[])].join('\n');$('io').scrollIntoView()}
+$('io').value=['# '+(f.nome||s.t),...L2,'','Atributos (base + racial + temp. = total)',...A.map((a,i)=>`${a}: ${s.base[i]} + ${+s.rac[i]||0} + ${+(s.tmp||[])[i]||0} = ${tot(s,i)}`),'','Perícias (★ treinada)',skl(s).map(k=>(k.tr?'★ ':'')+k.nm+' '+sgn(k.t)).join(', '),...(its(s).length?['','Itens ('+tsp(s)+' espaços)',...its(s).map(m=>`- ${m.n} (${+m.e||0})${m.d?': '+m.d:''}`)]:[]),...(s.pw.length?['','Poderes',...s.pw.map(p=>'- '+(p.e?p.e+' ':'')+p.n+(p.f?' ('+p.f+')':'')+(p.d?': '+p.d:''))]:[]),...(mgs(s).length?['','Magias',...mgs(s).map(m=>`- ${m.c}º círculo, ${m.n}${mdet(m)?' ('+mdet(m)+')':''}${m.ds?': '+m.ds:''}`)]:[])].join('\n');$('io').scrollIntoView()}
 function ex(all){$('io').value=JSON.stringify(all?S.s:cur(),null,1)}
 function cp(){const t=$('io');t.select();try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand('copy')}}
 function im(){try{let j=JSON.parse($('io').value);(Array.isArray(j)?j:[j]).forEach(x=>S.s.push(Object.assign(mk(0),x)));S.c=S.s.length-1;R()}catch(e){alert('JSON inválido')}}
