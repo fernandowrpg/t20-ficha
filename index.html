@@ -59,8 +59,10 @@ aside{width:100%;max-width:340px;justify-self:center}.cols[data-lay=top] aside{o
 
 <h2>Magias</h2><div id="mg"></div><button onclick="mgs(cur()).push({n:'',c:1,cd:0,o:1});sv();rM()">+ Magia</button>
 
+<h2>Guilda Tempest</h2><div id="gt"></div>
+
 <h2>Exportar / Importar</h2>
-<div class="row"><button onclick="ex(0)">Esta ficha</button><button onclick="ex(1)">Todas</button><button onclick="r20t()">Roll20 (JSON)</button><button onclick="r20d()">Roll20 (baixar .json)</button><button onclick="cp()">Copiar</button><button class="s" onclick="im()">Importar texto</button></div>
+<div class="row"><button onclick="ex(0)">Esta ficha</button><button onclick="ex(1)">Todas</button><button onclick="gtx()">Guilda Tempest</button><button onclick="r20t()">Roll20 (JSON)</button><button onclick="r20d()">Roll20 (baixar .json)</button><button onclick="cp()">Copiar</button><button class="s" onclick="im()">Importar texto</button></div>
 <textarea id="io" placeholder="O JSON exportado aparece aqui. Cole um JSON para importar." style="min-height:110px"></textarea></main><aside><div id="card" class="card"></div><div class="row" style="margin-top:8px"><button onclick="exC()">Cartão em texto</button></div>
 <div class="row"><select id="fmt" style="width:auto"><option value="png">PNG</option><option value="jpeg">JPEG</option></select><button onclick="gi()">🖼 Gerar imagem</button><button id="sgb" class="s" onclick="sg()" style="display:none">Salvar arquivo</button></div>
 <img id="pv" alt="Cartão" style="display:none;max-width:100%;border:2px solid var(--r);border-radius:6px"><div id="imsg" style="font-size:12px"></div></aside></div></div>
@@ -83,7 +85,7 @@ function R(){sv();const s=cur();
 $('sel').innerHTML=S.s.map((x,i)=>`<option value="${i}" ${i==S.c?'selected':''}>${esc(x.t)}</option>`).join('');
 $('hd').innerHTML=`<label style="grid-column:1/-1"><span class=l>Título da ficha</span><input value="${esc(s.t)}" oninput="cur().t=this.value;sv();$('sel').options[S.c].text=this.value"></label>`+
 F.map(([k,n])=>`<label><span class=l>${n}</span><input value="${esc(s.f[k])}" oninput="cur().f['${k}']=this.value;sv();${k=='nivel'?'rK()':''}"></label>`).join('');
-$('mode').value=s.mode;ly();rA();rP();rM();rK()}
+$('mode').value=s.mode;ly();rA();rP();rM();rK();rG()}
 function rA(){const s=cur(),p=s.mode=='p';let sp=0,sum=0;
 $('pbox').style.display=$('cst').style.display=p?'':'none';$('rb').style.display=p?'none':'';$('pool').value=s.pool;
 $('at').innerHTML=A.map((a,i)=>{const b=s.base[i];sp+=+s.costs[b]||0;sum+=b;
@@ -112,6 +114,18 @@ function rK(){const s=cur(),n=+s.f.nivel||1,h=n>>1,tr=n>=15?6:n>=7?4:2;s.pe=s.pe
 $('pk').innerHTML=`<div class=row>${[0,1].map(i=>`<label>Ofício${i?' 2':''}: <input value="${esc(s.of[i])}" placeholder="Nome do ofício" oninput="cur().of[${i}]=this.value;sv()"></label>`).join('')}</div><table><thead><tr><th>Perícia</th><th>Atrib.</th><th>Trein.</th><th>Outros</th><th>Total</th></tr></thead><tbody>`+
 SKS.map(([k,nm,d])=>{const e=s.pe[k]||{},a=e.a||d,t=h+tot(s,AT.indexOf(a))+(e.t?tr:0)+(+e.o||0);
 return `<tr><td>${nm}</td><td><select style="width:auto" onchange="ku('${k}','a',this.value)">${AT.map(x=>`<option ${x==a?'selected':''}>${x}</option>`).join('')}</select></td><td><input type=checkbox style="width:auto" ${e.t?'checked':''} onchange="ku('${k}','t',this.checked?1:0)"></td><td><input type=number value="${+e.o||0}" onchange="ku('${k}','o',+this.value)"></td><td class=tot style="font-size:18px">${t>0?'+'+t:t}</td></tr>`}).join('')+'</tbody></table><div style="font-size:12px">Total = ½ nível + atributo + treino (+2 / +4 / +6 nos níveis 1 / 7 / 15) + outros.</div>'}
+const FN=['Tank','Healer','Support','DPS','Especialista','Debuffer','Bruiser','All Rounder'],
+gg=s=>s.g||(s.g={slot:'01',pea:'1.0',tib:'T$ 600',fn:[],desc:'',bg:'',img:''});
+function gu(k,v){gg(cur())[k]=v;sv()}
+function gf(n,c){const g=gg(cur());let m='';g.fn=g.fn.filter(x=>x!=n);if(c)g.fn.push(n);if(g.fn.length>2){g.fn.pop();m='Máximo de duas funções.'}sv();rG();$('gmsg').textContent=m}
+function rG(){const g=gg(cur());$('gt').innerHTML=`<div class=g><label><span class=l>Slot de personagem</span><select onchange="gu('slot',this.value)">${['01 · primário','02 · secundário','03 · terciário','04','05'].map(o=>`<option value="${o.slice(0,2)}" ${g.slot==o.slice(0,2)?'selected':''}>${o}</option>`).join('')}</select></label>
+<label><span class=l>PeA</span><input value="${esc(g.pea)}" oninput="gu('pea',this.value)"></label>
+<label><span class=l>Tibares</span><input value="${esc(g.tib)}" oninput="gu('tib',this.value)"></label>
+<label style="grid-column:1/-1"><span class=l>Imagem do personagem (link)</span><input value="${esc(g.img)}" placeholder="https://… (obrigatória ao publicar)" oninput="gu('img',this.value)"></label></div>
+<div class=row><span class=l>Função primária (até 2):</span>${FN.map(n=>`<label><input type=checkbox style="width:auto" ${g.fn.includes(n)?'checked':''} onchange="gf('${n}',this.checked)"> ${n}</label>`).join(' ')}</div><div id=gmsg style="font-size:12px"></div>
+<span class=l>Descrição breve</span><textarea oninput="gu('desc',this.value)">${esc(g.desc)}</textarea><span class=l>Background (opcional)</span><textarea oninput="gu('bg',this.value)">${esc(g.bg)}</textarea>`}
+function gtx(){const s=cur(),f=s.f,g=gg(s),n=String(f.nivel||3).padStart(2,'0'),ti=[f.nome||s.t,n,f.classe].filter(Boolean).join(' - ')+(f.dist?' • '+f.dist:'');
+$('io').value=[`Título: ${ti}`,'',`Imagem: ${g.img||'(ATENÇÃO: adicione a imagem do personagem!)'}`,'',`Nome: ${f.nome||''}`,`Jogador: ${f.jogador||''}`,`Slot de Personagem: ${g.slot}`,`Raça: ${f.raca||''}`,`Devoção: ${f.div||''}`,`Origem: ${f.origem||''}`,`Classe: ${[f.classe,f.dist].filter(Boolean).join(' / ')}`,`Nível: ${n}`,`PeA: ${g.pea}`,`Tibares: ${g.tib}`,`Função Primária: ${g.fn.join(', ')}`,'',`Descrição Breve: ${g.desc}`,'',`Background: ${g.bg}`].join('\n');$('io').scrollIntoView()}
 function r20(){const s=cur(),f=s.f,z='0',at=['for','des','con','int','sab','car'],
 nt=[f.dist&&'Distinção: '+f.dist,f.xp&&'XP: '+f.xp].filter(Boolean).join('\n'),
 o={isJDA:true,playername:f.jogador||'',trace:f.raca||'',torigin:f.origem||'',tlevel:f.classe||'',charnivel:String(f.nivel||1)};
